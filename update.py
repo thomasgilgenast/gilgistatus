@@ -31,12 +31,12 @@ def updatetitle(site, url, titlestring):
 
 def checkstatus(url):
     status = 'offline'
-        try:
-            result = urlfetch.fetch(url, validate_certificate=False)
-            if result.status_code == 200:
-                return 'online'
-        except:
-            return 'offline'
+    try:
+        result = urlfetch.fetch(url, validate_certificate=False)
+        if result.status_code == 200:
+            return 'online'
+    except:
+        return 'offline'
     return 'offline'
 
 def updatestatus(site, url):
