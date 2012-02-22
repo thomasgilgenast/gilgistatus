@@ -3,22 +3,42 @@ import webapp2
 
 # imports for fetch-based status checking
 from google.appengine.api import urlfetch
-import lxml
+#import lxml.html
+#from xml.etree import ElementTree
 
 # imports for datastore
 from google.appengine.ext import db
 from models import Status
+
+import logging
+
+def parse(url):
+    #root = ElementTree.fromstring(urlfetch.fetch(url).content)
+    #root = ElementTree.parse(url)
+    #logging.info(list(root))
+    #html = root.find('html')
+    #logging.info(list(html))
+    #head = html.find('head')
+    #logging.info(list(head))
+    #title = head.find('title')
+    #title = ElementTree.fromstring('<xml>'+urlfetch.fetch(url).content+'</xml>').find(html/head/title)
+    response = urlfetch.fetch(url).content
+    [first, second] = response.split('<title>')
+    [title, third] = second.split('</title>')
+    return title
 
 class Update(webapp2.RequestHandler):
     def get(self):
         # check www
         url = "http://www.gilgi.org/"
         try:
-            t = lxml.html.parse(url)
+            title = parse(url)
+            #t = lxml.html.parse(url)
             #result = urlfetch.fetch(url)
             #logging.info(t.find(".//title").text)
             #logging.info(result.)
-            if t.find(".//title").text == 'Gilgi.org':
+            #if t.find(".//title").text == 'Gilgi.org':
+            if title == 'Gilgi.org':
                 s = Status.get_or_insert('www', status='online')
                 s.status = 'online'
                 s.put()
