@@ -8,82 +8,76 @@ from google.appengine.api import urlfetch
 from google.appengine.ext import db
 from models import Status
 
-def parse(url):
+# helper method that parses the title out of the html recieved from a url
+def parsetitle(url):
+    # make sure we're not getting cached content
     fetch_headers = {'Cache-Control':'no-cache,max-age=0', 'Pragma':'no-cache'}
+
+    # fetch the content
     response = urlfetch.fetch(url, headers=fetch_headers).content
+
+    # parse the content
     [first, second] = response.split('<title>')
     [title, third] = second.split('</title>')
+
+    # return the title
     return title
 
-def checktitle(url, titlestring):
-    try:
-        title = parse(url)
-        if titlestring in title:
-            return 'online'
-    except:
-        return 'offline'
+# update a particular instance of Status
+# according to the directions specified in its properties
+def update(status_instance):
+    # this update_type should be left alone
+    if status_instance.update_type = 'none':
+        return
+
+    # check the status
+    status = check(status_instance.url,
+                   check_type=status_instance.update_type,
+                   content=status_instance.update_content,
+                   title=status_instance.update_title)
+
+    # if the status has changed, update it
+    # and write the new status instance to the datastore
+    if status_instance.status != status:
+        status_instance.status = status
+        status_instance.put()
+    return
+
+def check(url, check_type='status', content='', title=''):
+    fetch_headers = {'Cache-Control':'no-cache,max-age=0', 'Pragma':'no-cache'}
+    if check_type == 'status':
+        try:
+            response = urlfetch.fetch(url, headers=fetch_headers, deadline=60, validate_certificate=False)
+            if response.status_code == 200:
+                return 'online'
+        except:
+            pass
+    elif check_type == 'title':
+        try:
+            parsedtitle = parsetitle(url)
+            if titlestring in parsedtitle:
+                return 'online'
+        except:
+            pass
+    elif check_type == 'content':
+        try:
+            response = urlfetch.fetch(url, headers=fetch_headers, deadline=60, validate_certificate=False).content
+            if content in response:
+                return 'online'
+        except:
+            pass
     return 'offline'
 
-def updatetitle(site, url, titlestring):
-    status = checktitle(url, titlestring)
-    s = Status.get_or_insert(site, status=status)
-    if s.status != status:
-        s.status = status
-        s.put()
-
-def checkstatus(url):
-    status = 'offline'
-    try:
-        fetch_headers = {'Cache-Control':'no-cache,max-age=0', 'Pragma':'no-cache'}
-        result = urlfetch.fetch(url, validate_certificate=False, headers=fetch_headers)
-        if result.status_code == 200:
-            return 'online'
-    except:
-        return 'offline'
-    return 'offline'
-
-def updatestatus(site, url):
-    status = checkstatus(url)
-    s = Status.get_or_insert(site, status=status)
-    if s.status != status:
-        s.status = status
-        s.put()
-
-def checkcontent(url, contentstring):
-    status = 'offline'
-    try:
-        fetch_headers = {'Cache-Control':'no-cache,max-age=0', 'Pragma':'no-cache'}
-        response = urlfetch.fetch(url, headers=fetch_headers, deadline=60).content
-        if contentstring in response:
-            return 'online'
-    except:
-        return 'offline'
-    return 'offline'
-
-def updatecontent(site, url, contentstring):
-    status = checkcontent(url, contentstring)
-    s = Status.get_or_insert(site, status=status)
-    if s.status != status:
-        s.status = status
-        s.put()
-
+# update "view" class
 class Update(webapp2.RequestHandler):
     def get(self):
-        # these update status by title
-        updatetitle('www'  , 'http://www.gilgi.org/'  , 'Gilgi.org')
-        updatetitle('code' , 'http://code.gilgi.org/' , 'scgs')
-        updatetitle('git', 'http://git.gilgi.org/', 'List of projects - ViewGit')
-        updatetitle('spqr', 'http://spqr.gilgi.org/', 'Roman Chickens')
-        updatetitle('sccms', 'http://sccms.gilgi.org/', 'SCCMS')
-        updatetitle('school', 'http://school.gilgi.org/', 'Princeton University Walking Navigation')
+        # update all the statuses
+        query = Status.all()
+        for result in query:
+            update(result)
+        return
 
-        # these update status by http status code
-        updatestatus('scgs', 'http://scgs.gilgi.org/')
-        updatestatus('svn', 'https://svn.gilgi.org:5555/')
-
-        # these search for arbitrary content in the http response
-        updatecontent('ts', 'http://ts.gilgi.org/', 'Scoot&#039;s Canoe TeamSpeak Server')
-        updatecontent('irc', 'http://irc.gilgi.org', 'online');
-
+# urlconf for update
+# separate from main urlconf because this url should be secured for cron only
 app = webapp2.WSGIApplication([('/update/', Update)],
                               debug=True)
