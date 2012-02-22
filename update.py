@@ -47,6 +47,23 @@ def updatestatus(site, url):
     s.status = status
     s.put()
 
+def checkcontent(url, contentstring):
+    status = 'offline'
+    try:
+        fetch_headers = {'Cache-Control':'no-cache,max-age=0', 'Pragma':'no-cache'}
+        response = urlfetch.fetch(url, headers=fetch_headers, deadline=60).content
+        if contentstring in response:
+            return 'online'
+    except:
+        return 'offline'
+    return 'offline'
+
+def updatecontent(site, url, contentstring):
+    status = checkcontent(url, contentstring)
+    s = Status.get_or_insert(site, status=status)
+    s.status = status
+    s.put()
+
 class Update(webapp2.RequestHandler):
     def get(self):
         # these update status by title
@@ -60,17 +77,10 @@ class Update(webapp2.RequestHandler):
         # these update status by http status code
         updatestatus('scgs', 'http://scgs.gilgi.org/')
         updatestatus('svn', 'https://svn.gilgi.org:5555/')
-        
-        # these aren't checked yet
-        # check irc
-        s = Status.get_or_insert('irc', status='unknown')
-        s.status = 'unknown'
-        s.put()
 
-        # check ts
-        s = Status.get_or_insert('ts', status='unknown')
-        s.status = 'unknown'
-        s.put()
+        # these search for arbitrary content in the http response
+        updatecontent('ts', 'http://ts.gilgi.org/', 'Scoot&#039;s Canoe TeamSpeak Server')
+        updatecontent('irc', 'http://irc.gilgi.org', 'online');
 
 app = webapp2.WSGIApplication([('/update/', Update)],
                               debug=True)
