@@ -27,8 +27,9 @@ def checktitle(url, titlestring):
 def updatetitle(site, url, titlestring):
     status = checktitle(url, titlestring)
     s = Status.get_or_insert(site, status=status)
-    s.status = status
-    s.put()
+    if s.status != status:
+        s.status = status
+        s.put()
 
 def checkstatus(url):
     status = 'offline'
@@ -44,8 +45,9 @@ def checkstatus(url):
 def updatestatus(site, url):
     status = checkstatus(url)
     s = Status.get_or_insert(site, status=status)
-    s.status = status
-    s.put()
+    if s.status != status:
+        s.status = status
+        s.put()
 
 def checkcontent(url, contentstring):
     status = 'offline'
@@ -61,8 +63,9 @@ def checkcontent(url, contentstring):
 def updatecontent(site, url, contentstring):
     status = checkcontent(url, contentstring)
     s = Status.get_or_insert(site, status=status)
-    s.status = status
-    s.put()
+    if s.status != status:
+        s.status = status
+        s.put()
 
 class Update(webapp2.RequestHandler):
     def get(self):
