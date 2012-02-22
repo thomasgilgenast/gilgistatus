@@ -8,8 +8,11 @@ from google.appengine.api import urlfetch
 from google.appengine.ext import db
 from models import Status
 
+import logging
+
 def parse(url):
-    response = urlfetch.fetch(url).content
+    fetch_headers = {'Cache-Control':'no-cache,max-age=0', 'Pragma':'no-cache'}
+    response = urlfetch.fetch(url, headers=fetch_headers).content
     [first, second] = response.split('<title>')
     [title, third] = second.split('</title>')
     return title
@@ -17,10 +20,14 @@ def parse(url):
 def checktitle(url, titlestring):
     try:
         title = parse(url)
+        logging.info(title)
         if titlestring in title:
+            logging.info(title + ' and ' + titlestring + ' match')
             return 'online'
     except:
+        logging.info('exception')
         return 'offline'
+    logging.info('no match, no exception')
     return 'offline'
 
 def updatetitle(site, url, titlestring):
@@ -32,7 +39,8 @@ def updatetitle(site, url, titlestring):
 def checkstatus(url):
     status = 'offline'
     try:
-        result = urlfetch.fetch(url, validate_certificate=False)
+        fetch_headers = {'Cache-Control':'no-cache,max-age=0', 'Pragma':'no-cache'}
+        result = urlfetch.fetch(url, validate_certificate=False, headers=fetch_headers)
         if result.status_code == 200:
             return 'online'
     except:
