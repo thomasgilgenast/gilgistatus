@@ -3,10 +3,6 @@ import webapp2
 import os
 from google.appengine.ext.webapp import template
 
-# imports for fetch-based status checking
-from google.appengine.api import urlfetch
-import lxml
-
 # imports for datastore
 from google.appengine.ext import db
 from models import Status

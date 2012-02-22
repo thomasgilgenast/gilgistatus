@@ -23,7 +23,3 @@ handlers:
 
 - url: /.*
   script: gilgistatus.app
-
-libraries:
-- name: django
-  version: "1.2"
