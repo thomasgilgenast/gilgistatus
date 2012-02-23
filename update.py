@@ -76,10 +76,19 @@ def check(url, check_type='status', content='', title=''):
 # update "view" class
 class Update(webapp.RequestHandler):
     def get(self):
-        # update all the statuses
+        # get all the statuses
         query = Status.all()
-        for result in query:
-            update(result)
+        if query:
+            for result in query:
+                # if there are already some, then update them
+                update(result)
+        else:
+            # create an example status and put it in the datastore
+            test = Status(description='google',
+                          comment='the acclaimed search engine',
+                          link_url='http://www.google.com',
+                          update_type='status')
+            test.put()
 
 # urlconf for update
 # separate from main urlconf because this url should be secured for cron only
