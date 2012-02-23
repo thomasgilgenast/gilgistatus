@@ -31,7 +31,7 @@ def parsetitle(url):
 # according to the directions specified in its properties
 def update(status_instance):
     # this update_type should be left alone
-    if status_instance.update_type = 'none':
+    if status_instance.update_type == 'none':
         return
 
     # check the status
