@@ -25,7 +25,7 @@ class Status(db.Model):
 
     # what url should we use to check the service
     # if different from the link_url above?
-    update_url = db.StringProperty(default=self.link_url)
+    update_url = db.StringProperty(default=link_url)
 
     # the status of the site
     status = db.StringProperty()

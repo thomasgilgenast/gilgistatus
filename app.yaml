@@ -20,9 +20,5 @@ handlers:
   script: update.py
   login: admin
 
-- url: /appengine_admin_media
-  static_dir: appengine_admin/media
-  secure: never
-
 - url: /.*
   script: urls.py
