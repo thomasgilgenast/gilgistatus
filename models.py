@@ -1,9 +1,6 @@
 # imports for datastore
 from google.appengine.ext import db
 
-# imports for appengine_admin
-import appengine_admin
-
 # represents the status of a site and associated information
 class Status(db.Model):
     # short description of the site
@@ -38,19 +35,3 @@ class Status(db.Model):
 
     def __unicode__(self):
         return self.key().name()
-
-# wrapper classes for admin interface
-class AdminStatus(appengine_admin.ModelAdmin):
-    model = Status
-    listFields =     ('description',
-                      'status',)
-    editFields =     ('description',
-                      'link_url',
-                      'comment',
-                      'check_type',
-                      'check_url',
-                      'status',)
-    readonlyFields = ('timestamp',)
-
-# register admin wrapper classes with the admin interface
-appengine_admin.register(AdminStatus)

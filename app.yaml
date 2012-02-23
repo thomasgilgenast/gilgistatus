@@ -1,8 +1,7 @@
 application: gilgistatus
-version: 3
-runtime: python27
+version: 4
+runtime: python
 api_version: 1
-threadsafe: true
 
 handlers:
 - url: /favicon\.ico
@@ -18,7 +17,7 @@ handlers:
   upload: status\.css
 
 - url: /update/
-  script: update.app
+  script: update.py
   login: admin
 
 - url: /appengine_admin_media
@@ -26,8 +25,4 @@ handlers:
   secure: never
 
 - url: /.*
-  script: gilgistatus.app
-
-libraries:
-- name: django
-  version: latest
+  script: urls.py

@@ -1,5 +1,9 @@
 # required general imports
-import webapp2
+from google.appengine.ext import webapp
+import os
+
+# urlconf imports
+from google.appengine.ext.webapp.util import run_wsgi_app
 
 # imports for fetch-based status checking
 from google.appengine.api import urlfetch
@@ -41,9 +45,10 @@ def update(status_instance):
     if status_instance.status != status:
         status_instance.status = status
         status_instance.put()
-    return
 
+# checks the url with the parameters passed
 def check(url, check_type='status', content='', title=''):
+    # make sure we're not getting cached content
     fetch_headers = {'Cache-Control':'no-cache,max-age=0', 'Pragma':'no-cache'}
     if check_type == 'status':
         try:
@@ -69,15 +74,20 @@ def check(url, check_type='status', content='', title=''):
     return 'offline'
 
 # update "view" class
-class Update(webapp2.RequestHandler):
+class Update(webapp.RequestHandler):
     def get(self):
         # update all the statuses
         query = Status.all()
         for result in query:
             update(result)
-        return
 
 # urlconf for update
 # separate from main urlconf because this url should be secured for cron only
-app = webapp2.WSGIApplication([('/update/', Update)],
-                              debug=True)
+app = webapp.WSGIApplication([('/update/', Update)],
+                             debug=True)
+
+def main():
+    run_wsgi_app(app)
+
+if __name__ == "__main__":
+    main()
