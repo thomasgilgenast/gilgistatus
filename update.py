@@ -12,6 +12,8 @@ from google.appengine.api import urlfetch
 from google.appengine.ext import db
 from models import Status
 
+import logging
+
 # helper method that parses the title out of the html recieved from a url
 def parsetitle(url):
     # make sure we're not getting cached content
@@ -35,7 +37,7 @@ def update(status_instance):
         return
 
     # check the status
-    status = check(status_instance.url,
+    status = check(status_instance.update_url,
                    check_type=status_instance.update_type,
                    content=status_instance.update_content,
                    title=status_instance.update_title)
@@ -78,7 +80,7 @@ class Update(webapp.RequestHandler):
     def get(self):
         # get all the statuses
         query = Status.all()
-        if query:
+        if query.count() != 0:
             for result in query:
                 # if there are already some, then update them
                 update(result)
@@ -87,7 +89,9 @@ class Update(webapp.RequestHandler):
             test = Status(description='google',
                           comment='the acclaimed search engine',
                           link_url='http://www.google.com',
-                          update_type='status')
+                          link_text='www.google.com',
+                          update_type='status',
+                          update_url='http://www.google.com')
             test.put()
 
 # urlconf for update

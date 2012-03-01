@@ -15,7 +15,7 @@
   {% for site in statuses %}
   <tr>
     <td>{{ site.description }}</td>
-    <td><a href ="{{ site.link_url }}">{{ link_url }}</a></td>
+    <td><a href ="{{ site.link_url }}">{{ site.link_url }}</a></td>
     <td class="{{ site.status }}">{{ site.status }}</td>
     <td>{{ site.comment }}</td>
   </tr>
